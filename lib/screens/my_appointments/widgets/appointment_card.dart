@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../models/appointments/appointment_model.dart';
+import '../../../providers/appointment/appointment_provider.dart';
 
 class AppointmentCard extends StatelessWidget {
   final AppointmentModel appointment;
@@ -18,6 +20,54 @@ class AppointmentCard extends StatelessWidget {
         return Colors.blue;
       default:
         return Colors.grey;
+    }
+  }
+
+  // ═══ CANCEL DIALOG ═══
+  Future<void> _showCancelDialog(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Cancel Appointment'),
+          content: const Text(
+            'Are you sure you want to cancel this appointment?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('No', style: TextStyle(color: Colors.black54)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text(
+                'Yes, Cancel',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true && context.mounted) {
+      final success = await context
+          .read<AppointmentProvider>()
+          .cancelAppointment(appointment.id);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              success
+                  ? 'Appointment cancelled successfully'
+                  : context.read<AppointmentProvider>().error ??
+                        'Failed to cancel',
+            ),
+            backgroundColor: success ? const Color(0xFFB565A7) : Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -40,10 +90,9 @@ class AppointmentCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Doctor name + status chip
+          // Doctor info + status
           Row(
             children: [
-              // Doctor avatar
               Container(
                 width: 46,
                 height: 46,
@@ -74,7 +123,6 @@ class AppointmentCard extends StatelessWidget {
 
               const SizedBox(width: 12),
 
-              // Doctor info
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,7 +173,7 @@ class AppointmentCard extends StatelessWidget {
           const Divider(height: 1, color: Color(0xFFF0F0F0)),
           const SizedBox(height: 12),
 
-          // Date + time slot
+          // Date + time
           Row(
             children: [
               const Icon(
@@ -148,7 +196,7 @@ class AppointmentCard extends StatelessWidget {
             ],
           ),
 
-          // Reason if exists
+          // Reason
           if (appointment.reason != null) ...[
             const SizedBox(height: 8),
             Row(
@@ -165,8 +213,71 @@ class AppointmentCard extends StatelessWidget {
               ],
             ),
           ],
+
+          const SizedBox(height: 12),
+
+          // ═══ ACTION BUTTONS based on status ═══
+          _buildActionButtons(context),
         ],
       ),
     );
+  }
+
+  Widget _buildActionButtons(BuildContext context) {
+    // PENDING or CONFIRMED — show cancel button
+    if (appointment.status == 'PENDING' || appointment.status == 'CONFIRMED') {
+      return SizedBox(
+        width: double.infinity,
+        child: OutlinedButton.icon(
+          onPressed: () => _showCancelDialog(context),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: Colors.red,
+            side: const BorderSide(color: Colors.red),
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          icon: const Icon(Icons.cancel_outlined, size: 16),
+          label: const Text(
+            'Cancel Appointment',
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+          ),
+        ),
+      );
+    }
+
+    // COMPLETED — show view results button
+    if (appointment.status == 'COMPLETED') {
+      return SizedBox(
+        width: double.infinity,
+        child: ElevatedButton.icon(
+          onPressed: () {
+            Navigator.pushNamed(
+              context,
+              '/appointment-results',
+              arguments: appointment,
+            );
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFB565A7),
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            elevation: 0,
+          ),
+          icon: const Icon(Icons.medical_information_outlined, size: 16),
+          label: const Text(
+            'View Results',
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+          ),
+        ),
+      );
+    }
+
+    // CANCELLED — show nothing
+    return const SizedBox.shrink();
   }
 }

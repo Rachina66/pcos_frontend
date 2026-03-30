@@ -56,4 +56,12 @@ class AppointmentService {
       throw ApiException.fromDioException(e);
     }
   }
+
+  Future<void> cancelAppointment(String id) async {
+    try {
+      await _dio.delete(ApiEndpoints.cancelAppointment(id));
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
 }

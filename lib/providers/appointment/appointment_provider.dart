@@ -89,6 +89,49 @@ class AppointmentProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> cancelAppointment(String id) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      await _service.cancelAppointment(id);
+      // Update locally so UI refreshes immediately
+      _appointments = _appointments.map((a) {
+        if (a.id == id) {
+          return AppointmentModel(
+            id: a.id,
+            userId: a.userId,
+            doctorId: a.doctorId,
+            date: a.date,
+            timeSlot: a.timeSlot,
+            reason: a.reason,
+            reportFile: a.reportFile,
+            status: 'CANCELLED',
+            notes: a.notes,
+            consultationNotes: a.consultationNotes,
+            prescription: a.prescription,
+            diagnosis: a.diagnosis,
+            createdAt: a.createdAt,
+            updatedAt: a.updatedAt,
+            doctor: a.doctor,
+          );
+        }
+        return a;
+      }).toList();
+      return true;
+    } on ApiException catch (e) {
+      _error = e.message;
+      return false;
+    } catch (e) {
+      _error = 'Something went wrong. Please try again.';
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   // ═══ CLEAR ═══
   void clearMessages() {
     _error = null;

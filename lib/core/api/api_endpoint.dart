@@ -24,7 +24,7 @@ class ApiEndpoints {
 
   static const String myPredictions = '/user/predictions';
   static const String createPrediction = '/user/predictions';
-
+  static String cancelAppointment(String id) => '/user/appointments/$id';
   //doctor
   static const String doctorProfile = '/doctor/profile';
   static const String doctorStats = '/doctor/stats';
