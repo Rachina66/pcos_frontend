@@ -17,7 +17,7 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AppointmentProvider>().fetchMyAppointments();
@@ -36,7 +36,6 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen>
       backgroundColor: const Color(0xFFF5F5F5),
       body: Column(
         children: [
-          // ═══ HEADER ═══
           _buildHeader(context),
 
           // ═══ TABS ═══
@@ -47,6 +46,8 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen>
               labelColor: const Color(0xFFB565A7),
               unselectedLabelColor: Colors.black38,
               indicatorColor: const Color(0xFFB565A7),
+              isScrollable: true,
+              tabAlignment: TabAlignment.start,
               labelStyle: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -54,7 +55,8 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen>
               tabs: const [
                 Tab(text: 'Upcoming'),
                 Tab(text: 'Pending'),
-                Tab(text: 'Past'),
+                Tab(text: 'Completed'),
+                Tab(text: 'Cancelled'),
               ],
             ),
           ),
@@ -106,22 +108,25 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen>
                 return TabBarView(
                   controller: _tabController,
                   children: [
-                    // Upcoming tab
                     _buildAppointmentList(
                       appointmentProvider.upcomingAppointments,
                       'No upcoming appointments',
+                      Icons.calendar_today_outlined,
                     ),
-
-                    // Pending tab
                     _buildAppointmentList(
                       appointmentProvider.pendingAppointments,
                       'No pending appointments',
+                      Icons.hourglass_empty_outlined,
                     ),
-
-                    // Past tab
                     _buildAppointmentList(
-                      appointmentProvider.pastAppointments,
-                      'No past appointments',
+                      appointmentProvider.completedAppointments,
+                      'No completed appointments',
+                      Icons.check_circle_outline,
+                    ),
+                    _buildAppointmentList(
+                      appointmentProvider.cancelledAppointments,
+                      'No cancelled appointments',
+                      Icons.cancel_outlined,
                     ),
                   ],
                 );
@@ -133,18 +138,17 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen>
     );
   }
 
-  // ═══ APPOINTMENT LIST ═══
-  Widget _buildAppointmentList(List appointments, String emptyMessage) {
+  Widget _buildAppointmentList(
+    List appointments,
+    String emptyMessage,
+    IconData emptyIcon,
+  ) {
     if (appointments.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.calendar_today_outlined,
-              size: 48,
-              color: Colors.black.withOpacity(0.2),
-            ),
+            Icon(emptyIcon, size: 48, color: Colors.black.withOpacity(0.2)),
             const SizedBox(height: 12),
             Text(
               emptyMessage,
@@ -164,7 +168,6 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen>
     );
   }
 
-  // ═══ HEADER ═══
   Widget _buildHeader(BuildContext context) {
     return Container(
       width: double.infinity,

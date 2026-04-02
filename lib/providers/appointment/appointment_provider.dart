@@ -28,7 +28,11 @@ class AppointmentProvider extends ChangeNotifier {
             (a.status == 'PENDING' || a.status == 'CONFIRMED'),
       )
       .toList();
+  List<AppointmentModel> get completedAppointments =>
+      _appointments.where((a) => a.status == 'COMPLETED').toList();
 
+  List<AppointmentModel> get cancelledAppointments =>
+      _appointments.where((a) => a.status == 'CANCELLED').toList();
   List<AppointmentModel> get pastAppointments =>
       _appointments.where((a) => a.date.isBefore(DateTime.now())).toList();
 
