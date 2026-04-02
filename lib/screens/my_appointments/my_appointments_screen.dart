@@ -46,10 +46,8 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen>
               labelColor: const Color(0xFFB565A7),
               unselectedLabelColor: Colors.black38,
               indicatorColor: const Color(0xFFB565A7),
-              isScrollable: true,
-              tabAlignment: TabAlignment.start,
               labelStyle: const TextStyle(
-                fontSize: 13,
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
               tabs: const [

@@ -76,7 +76,7 @@ class HomeScreen extends StatelessWidget {
                       icon: Icons.history,
                       label: 'History & Reports',
                       onTap: () {
-                        // TODO: navigate to history
+                        Navigator.pushNamed(context, '/history-reports');
                       },
                     ),
 

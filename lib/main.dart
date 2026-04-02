@@ -10,7 +10,8 @@ import 'screens/pages/home_screen.dart';
 import 'screens/doctors/doctors_list_screen.dart';
 import 'screens/appointment/appointment_screen.dart';
 import 'screens/my_appointments/my_appointments_screen.dart';
-import 'screens/my_appointments/appointment_results_screen.dart';
+import 'screens/my_appointments/appointment_details_screen.dart';
+import 'screens/history/history_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,7 +48,8 @@ class MyApp extends StatelessWidget {
         '/doctors': (context) => const DoctorsListScreen(),
         '/book-appointment': (context) => const BookAppointmentScreen(),
         '/my-appointments': (context) => const MyAppointmentsScreen(),
-        '/appointment-results': (context) => const AppointmentResultsScreen(),
+        '/appointment-results': (context) => const AppointmentDetailScreen(),
+        '/history-reports': (context) => const HistoryReportsScreen(),
       },
     );
   }
