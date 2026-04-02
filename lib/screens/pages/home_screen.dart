@@ -221,7 +221,7 @@ class HomeScreen extends StatelessWidget {
       {
         'icon': Icons.calendar_month_outlined,
         'label': 'Track Menstruation',
-        'onTap': () {}, // TODO
+        'onTap': () => Navigator.pushNamed(context, '/cycle-tracking'),
       },
       {
         'icon': Icons.restaurant_menu_outlined,
@@ -231,7 +231,7 @@ class HomeScreen extends StatelessWidget {
       {
         'icon': Icons.monitor_heart_outlined,
         'label': 'Daily Symptoms',
-        'onTap': () {}, // TODO
+        'onTap': () => Navigator.pushNamed(context, '/cycle-tracking'),
       },
       {
         'icon': Icons.tips_and_updates_outlined,

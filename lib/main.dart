@@ -12,6 +12,9 @@ import 'screens/appointment/appointment_screen.dart';
 import 'screens/my_appointments/my_appointments_screen.dart';
 import 'screens/my_appointments/appointment_details_screen.dart';
 import 'screens/history/history_screen.dart';
+import 'providers/cycle/cycle_provider.dart';
+import 'screens/cycle/cycle_tracking_screen.dart';
+import 'screens/cycle/symptoms_insights_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,6 +26,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => DoctorProvider()),
         ChangeNotifierProvider(create: (_) => AppointmentProvider()),
+        ChangeNotifierProvider(create: (_) => CycleProvider()),
       ],
       child: const MyApp(),
     ),
@@ -50,6 +54,8 @@ class MyApp extends StatelessWidget {
         '/my-appointments': (context) => const MyAppointmentsScreen(),
         '/appointment-results': (context) => const AppointmentDetailScreen(),
         '/history-reports': (context) => const HistoryReportsScreen(),
+        '/cycle-tracking': (context) => const CycleTrackingScreen(), // ← add
+        '/symptom-insights': (context) => const SymptomInsightsScreen(),
       },
     );
   }
