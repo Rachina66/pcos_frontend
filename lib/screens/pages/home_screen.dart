@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth/auth_provider.dart';
+import '../../screens/pcos_check/pcos_check_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -170,7 +171,7 @@ class HomeScreen extends StatelessWidget {
       width: double.infinity,
       child: ElevatedButton.icon(
         onPressed: () {
-          // TODO: navigate to PCOS check
+          Navigator.pushNamed(context, '/pcos-check');
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFFB565A7),

@@ -15,6 +15,8 @@ import 'screens/history/history_screen.dart';
 import 'providers/cycle/cycle_provider.dart';
 import 'screens/cycle/cycle_tracking_screen.dart';
 import 'screens/cycle/symptoms_insights_screen.dart';
+import 'providers/prediction/prediction_provider.dart';
+import 'screens/pcos_check/pcos_check_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +29,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => DoctorProvider()),
         ChangeNotifierProvider(create: (_) => AppointmentProvider()),
         ChangeNotifierProvider(create: (_) => CycleProvider()),
+        ChangeNotifierProvider(create: (_) => PredictionProvider()),
       ],
       child: const MyApp(),
     ),
@@ -56,6 +59,8 @@ class MyApp extends StatelessWidget {
         '/history-reports': (context) => const HistoryReportsScreen(),
         '/cycle-tracking': (context) => const CycleTrackingScreen(), // ← add
         '/symptom-insights': (context) => const SymptomInsightsScreen(),
+        // in routes:
+        '/pcos-check': (context) => const PcosCheckScreen(),
       },
     );
   }

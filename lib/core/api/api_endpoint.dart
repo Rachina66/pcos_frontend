@@ -60,11 +60,15 @@ class ApiEndpoints {
   static const String adminAppointments = '/admin/appointments';
   static String adminAppointmentById(String id) => '/admin/appointments/$id';
 
-  // ═══ CYCLE ═══
+  // Cycle
   static const String cycles = '/user/cycles';
   static const String cyclesPrediction = '/user/cycles/prediction';
   static const String cyclesSymptoms = '/user/cycles/symptoms';
   static const String cyclesTodaySymptoms = '/user/cycles/symptoms/today';
   static const String cyclesInsights = '/user/cycles/symptoms/insights';
   static String cycleById(String id) => '/user/cycles/$id';
+
+  // prediction
+  static const String predict = '/prediction/predict';
+  static const String predictions = '/prediction/predictions';
 }
