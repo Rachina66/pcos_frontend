@@ -1,12 +1,13 @@
 class ApiEndpoints {
-  static const String ip = '192.168.1.115';
-  static const String baseUrl = 'http://192.168.1.115:4000/api';
+  static const String ip = 'https://self-plaza-calibrate.ngrok-free.dev';
+  static const String baseUrl =
+      'https://self-plaza-calibrate.ngrok-free.dev/api';
 
   // auth
   static const String login = '/auth/login';
   static const String register = '/auth/register';
   static const String profile = '/auth/profile';
-
+  static const String verifyEmail = '/auth/verify-email';
   //public
   static const String doctors = '/public/doctors';
   static String doctorById(String id) => '/public/doctors/$id';

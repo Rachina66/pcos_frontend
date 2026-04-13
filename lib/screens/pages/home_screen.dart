@@ -227,7 +227,7 @@ class HomeScreen extends StatelessWidget {
       {
         'icon': Icons.restaurant_menu_outlined,
         'label': 'Meal Plan',
-        'onTap': () {}, // TODO
+        'onTap': () => Navigator.pushNamed(context, '/meal-plan'),
       },
       {
         'icon': Icons.monitor_heart_outlined,

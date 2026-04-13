@@ -17,6 +17,10 @@ import 'screens/cycle/cycle_tracking_screen.dart';
 import 'screens/cycle/symptoms_insights_screen.dart';
 import 'providers/prediction/prediction_provider.dart';
 import 'screens/pcos_check/pcos_check_screen.dart';
+import 'providers/meal/meal_provider.dart';
+import 'screens/pcos_check/prediction_history_screen.dart';
+import 'screens/auth/otp_verification_screen.dart';
+import 'screens/meal/meal_plan_sreen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +34,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => AppointmentProvider()),
         ChangeNotifierProvider(create: (_) => CycleProvider()),
         ChangeNotifierProvider(create: (_) => PredictionProvider()),
+        ChangeNotifierProvider(create: (_) => MealProvider()),
       ],
       child: const MyApp(),
     ),
@@ -61,6 +66,9 @@ class MyApp extends StatelessWidget {
         '/symptom-insights': (context) => const SymptomInsightsScreen(),
         // in routes:
         '/pcos-check': (context) => const PcosCheckScreen(),
+        '/prediction-history': (context) => const PredictionHistoryScreen(),
+        '/otp-verify': (context) => const OtpVerificationScreen(),
+        '/meal-plan': (context) => const MealPlanScreen(),
       },
     );
   }

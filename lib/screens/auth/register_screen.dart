@@ -43,7 +43,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
     } else {
       // Navigate to home on success
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushReplacementNamed(context, '/otp-verify');
     }
   }
 
