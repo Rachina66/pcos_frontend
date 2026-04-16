@@ -1,9 +1,11 @@
+// lib/screens/cycle/cycle_tracking_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../providers/cycle/cycle_provider.dart';
-import 'widgets/log_period_bottom_sheet.dart';
-import './symptoms_insights_screen.dart';
+import 'daily_log_screen.dart';
+import 'cycle_insights_screen.dart';
 
 class CycleTrackingScreen extends StatefulWidget {
   const CycleTrackingScreen({super.key});
@@ -14,30 +16,12 @@ class CycleTrackingScreen extends StatefulWidget {
 
 class _CycleTrackingScreenState extends State<CycleTrackingScreen> {
   DateTime _focusedDay = DateTime.now();
-  final List<String> _allSymptoms = [
-    'Cramps',
-    'Bloating',
-    'Fatigue',
-    'Headache',
-    'Mood Swings',
-    'Acne',
-    'Back Pain',
-    'Nausea',
-  ];
-
-  List<String> _selectedSymptoms = [];
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await context.read<CycleProvider>().loadAllData();
-      if (mounted) {
-        final provider = context.read<CycleProvider>();
-        setState(() {
-          _selectedSymptoms = List.from(provider.todaySymptoms);
-        });
-      }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CycleProvider>().loadAllData();
     });
   }
 
@@ -46,7 +30,7 @@ class _CycleTrackingScreenState extends State<CycleTrackingScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: Consumer<CycleProvider>(
-        builder: (context, provider, child) {
+        builder: (context, provider, _) {
           return Column(
             children: [
               _buildHeader(context, provider),
@@ -62,34 +46,19 @@ class _CycleTrackingScreenState extends State<CycleTrackingScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // ── Log Period Button ──
-                            _buildLogPeriodButton(context, provider),
+                            _buildLogTodayButton(context, provider),
                             const SizedBox(height: 16),
-
-                            // ── Calendar ──
                             _buildCalendar(provider),
                             const SizedBox(height: 16),
-
-                            // ── Cycle Insights ──
                             _buildSectionTitle('Cycle Insights'),
                             const SizedBox(height: 10),
                             _buildInsightCards(provider),
                             const SizedBox(height: 16),
-
-                            // ── Today's Symptoms ──
-                            _buildSectionTitle("Log Today's Symptoms"),
-                            const SizedBox(height: 10),
-                            _buildSymptomsSection(provider),
+                            _buildInsightsButton(context),
                             const SizedBox(height: 16),
-
-                            // ── Symptom Insights Button ──
-                            _buildSymptomInsightsButton(context),
-                            const SizedBox(height: 16),
-
-                            // ── Cycle History ──
                             _buildSectionTitle('Cycle History'),
                             const SizedBox(height: 10),
-                            _buildCycleHistory(context, provider),
+                            _buildCycleHistory(provider),
                             const SizedBox(height: 24),
                           ],
                         ),
@@ -102,9 +71,19 @@ class _CycleTrackingScreenState extends State<CycleTrackingScreen> {
     );
   }
 
-  // ── HEADER ──
   Widget _buildHeader(BuildContext context, CycleProvider provider) {
-    final prediction = provider.prediction;
+    final p = provider.prediction;
+    final status = p?.status;
+
+    Color statusColor = Colors.white70;
+    String statusLabel = '';
+    if (status == 'late') {
+      statusColor = const Color(0xFFFFCDD2);
+      statusLabel = 'Period may be late';
+    } else if (status == 'due') {
+      statusColor = const Color(0xFFFFE0B2);
+      statusLabel = 'Period due soon';
+    }
 
     return Container(
       width: double.infinity,
@@ -156,7 +135,28 @@ class _CycleTrackingScreenState extends State<CycleTrackingScreen> {
           ),
           const SizedBox(height: 16),
 
-          // ── Summary Card ──
+          // Status banner if late or due
+          if (statusLabel.isNotEmpty) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              margin: const EdgeInsets.only(bottom: 10),
+              decoration: BoxDecoration(
+                color: statusColor.withOpacity(0.25),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: statusColor.withOpacity(0.5)),
+              ),
+              child: Text(
+                statusLabel,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: statusColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
@@ -173,15 +173,11 @@ class _CycleTrackingScreenState extends State<CycleTrackingScreen> {
                       children: [
                         const Text(
                           'Current Cycle',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.white70,
-                          ),
+                          style: TextStyle(fontSize: 11, color: Colors.white70),
                         ),
                         Text(
-                          prediction?.predicted == true &&
-                                  prediction?.currentCycleDay != null
-                              ? 'Day ${prediction!.currentCycleDay}'
+                          p?.predicted == true && p?.currentCycleDay != null
+                              ? 'Day ${p!.currentCycleDay}'
                               : 'No data',
                           style: const TextStyle(
                             fontSize: 24,
@@ -191,8 +187,7 @@ class _CycleTrackingScreenState extends State<CycleTrackingScreen> {
                         ),
                       ],
                     ),
-                    if (prediction?.predicted == true &&
-                        prediction?.nextPeriodDate != null)
+                    if (p?.predicted == true && p?.nextPeriodStart != null)
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
@@ -212,7 +207,7 @@ class _CycleTrackingScreenState extends State<CycleTrackingScreen> {
                               ),
                             ),
                             Text(
-                              '${prediction!.nextPeriodDate!.day}/${prediction.nextPeriodDate!.month}',
+                              '${p!.nextPeriodStart!.day}/${p.nextPeriodStart!.month}',
                               style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
@@ -220,7 +215,9 @@ class _CycleTrackingScreenState extends State<CycleTrackingScreen> {
                               ),
                             ),
                             Text(
-                              'in ${prediction.daysUntil} days',
+                              p.daysUntil != null && p.daysUntil! >= 0
+                                  ? 'in ${p.daysUntil} days'
+                                  : '${p.daysUntil!.abs()} days ago',
                               style: const TextStyle(
                                 fontSize: 10,
                                 color: Colors.white70,
@@ -237,8 +234,8 @@ class _CycleTrackingScreenState extends State<CycleTrackingScreen> {
                     Expanded(
                       child: _buildHeaderStat(
                         'Last Period',
-                        prediction?.lastPeriodDate != null
-                            ? '${prediction!.lastPeriodDate!.day}/${prediction.lastPeriodDate!.month}/${prediction.lastPeriodDate!.year}'
+                        p?.lastPeriodDate != null
+                            ? '${p!.lastPeriodDate!.day}/${p.lastPeriodDate!.month}/${p.lastPeriodDate!.year}'
                             : '—',
                       ),
                     ),
@@ -246,8 +243,17 @@ class _CycleTrackingScreenState extends State<CycleTrackingScreen> {
                     Expanded(
                       child: _buildHeaderStat(
                         'Avg Cycle',
-                        prediction?.avgCycleLength != null
-                            ? '${prediction!.avgCycleLength} days'
+                        p?.avgCycleLength != null
+                            ? '${p!.avgCycleLength} days'
+                            : '—',
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _buildHeaderStat(
+                        'Confidence',
+                        p?.confidence != null
+                            ? _capitalize(p!.confidence!)
                             : '—',
                       ),
                     ),
@@ -289,22 +295,25 @@ class _CycleTrackingScreenState extends State<CycleTrackingScreen> {
     );
   }
 
-  // ── LOG PERIOD BUTTON ──
-  Widget _buildLogPeriodButton(BuildContext context, CycleProvider provider) {
+  Widget _buildLogTodayButton(BuildContext context, CycleProvider provider) {
+    final today = DateTime.now();
+    final todayStr = provider.formatDate(today);
+    final alreadyLogged = provider.dailyLogs.any(
+      (l) =>
+          l.date.year == today.year &&
+          l.date.month == today.month &&
+          l.date.day == today.day,
+    );
+
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
-        onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            backgroundColor: Colors.transparent,
-            builder: (context) => LogPeriodBottomSheet(
-              onSaved: () {
-                provider.loadAllData();
-              },
-            ),
+        onPressed: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => DailyLogScreen(date: todayStr)),
           );
+          provider.loadAllData();
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFFB565A7),
@@ -315,16 +324,18 @@ class _CycleTrackingScreenState extends State<CycleTrackingScreen> {
           ),
           elevation: 0,
         ),
-        icon: const Icon(Icons.add_circle_outline, size: 20),
-        label: const Text(
-          'Log New Period',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+        icon: Icon(
+          alreadyLogged ? Icons.edit_outlined : Icons.add_circle_outline,
+          size: 20,
+        ),
+        label: Text(
+          alreadyLogged ? 'Edit Today\'s Log' : 'Log Today',
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         ),
       ),
     );
   }
 
-  // ── CALENDAR ──
   Widget _buildCalendar(CycleProvider provider) {
     return Container(
       decoration: BoxDecoration(
@@ -345,20 +356,28 @@ class _CycleTrackingScreenState extends State<CycleTrackingScreen> {
             lastDay: DateTime.now().add(const Duration(days: 180)),
             focusedDay: _focusedDay,
             calendarFormat: CalendarFormat.month,
-            availableCalendarFormats: const {
-              CalendarFormat.month: 'Month',
-            },
-            onPageChanged: (focusedDay) {
-              setState(() => _focusedDay = focusedDay);
+            availableCalendarFormats: const {CalendarFormat.month: 'Month'},
+            onPageChanged: (d) => setState(() => _focusedDay = d),
+            onDaySelected: (selected, focused) async {
+              setState(() => _focusedDay = focused);
+              // Tap any past/today date to log it
+              if (!selected.isAfter(DateTime.now())) {
+                final provider = context.read<CycleProvider>();
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        DailyLogScreen(date: provider.formatDate(selected)),
+                  ),
+                );
+                provider.loadAllData();
+              }
             },
             calendarBuilders: CalendarBuilders(
               defaultBuilder: (context, day, focusedDay) {
-                final normalDay =
-                    DateTime(day.year, day.month, day.day);
-                final isPeriod =
-                    provider.periodDays.contains(normalDay);
-                final isPredicted =
-                    provider.predictedDays.contains(normalDay);
+                final norm = DateTime(day.year, day.month, day.day);
+                final isPeriod = provider.periodDays.contains(norm);
+                final isPredicted = provider.predictedDays.contains(norm);
                 final isToday = isSameDay(day, DateTime.now());
 
                 if (isPeriod) {
@@ -368,7 +387,6 @@ class _CycleTrackingScreenState extends State<CycleTrackingScreen> {
                     textColor: const Color(0xFF72243E),
                   );
                 }
-
                 if (isPredicted) {
                   return _calendarDay(
                     day.day.toString(),
@@ -377,7 +395,6 @@ class _CycleTrackingScreenState extends State<CycleTrackingScreen> {
                     isDashed: true,
                   );
                 }
-
                 if (isToday) {
                   return _calendarDay(
                     day.day.toString(),
@@ -385,7 +402,6 @@ class _CycleTrackingScreenState extends State<CycleTrackingScreen> {
                     textColor: Colors.white,
                   );
                 }
-
                 return null;
               },
             ),
@@ -399,20 +415,10 @@ class _CycleTrackingScreenState extends State<CycleTrackingScreen> {
               ),
             ),
             calendarStyle: const CalendarStyle(
-              todayDecoration: BoxDecoration(
-                color: Color(0xFFB565A7),
-                shape: BoxShape.circle,
-              ),
-              selectedDecoration: BoxDecoration(
-                color: Color(0xFFB565A7),
-                shape: BoxShape.circle,
-              ),
               weekendTextStyle: TextStyle(color: Colors.black54),
               defaultTextStyle: TextStyle(color: Colors.black87),
             ),
           ),
-
-          // ── Legend ──
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             child: Row(
@@ -485,7 +491,6 @@ class _CycleTrackingScreenState extends State<CycleTrackingScreen> {
     );
   }
 
-  // ── INSIGHT CARDS ──
   Widget _buildInsightCards(CycleProvider provider) {
     final p = provider.prediction;
     return GridView.count(
@@ -499,27 +504,32 @@ class _CycleTrackingScreenState extends State<CycleTrackingScreen> {
         _buildInsightCard(
           'Avg Cycle Length',
           p?.avgCycleLength != null ? '${p!.avgCycleLength} days' : '—',
-          'Normal range',
+          'Normal: 21–35 days',
         ),
         _buildInsightCard(
           'Period Duration',
-          p?.avgDuration != null ? '${p!.avgDuration} days' : '—',
-          'Normal range',
+          p?.avgPeriodLength != null ? '${p!.avgPeriodLength} days' : '—',
+          'Normal: 3–7 days',
         ),
         _buildInsightCard(
           'Regularity',
-          p?.regularity ?? '—',
+          p?.regularity != null ? _capitalize(p!.regularity!) : '—',
           p?.variation != null ? 'Varies ±${p!.variation} days' : '',
-          valueColor: p?.regularity == 'Irregular'
+          valueColor: p?.regularity == 'irregular'
               ? const Color(0xFF993556)
-              : Colors.green,
+              : p?.regularity == 'regular'
+              ? Colors.green
+              : Colors.black87,
         ),
         _buildInsightCard(
-          'Cycles Logged',
-          '${provider.cycles.length} cycles',
-          provider.cycles.isNotEmpty
-              ? 'Since ${provider.cycles.last.startDate.month}/${provider.cycles.last.startDate.year}'
-              : '',
+          'Confidence',
+          p?.confidence != null ? _capitalize(p!.confidence!) : '—',
+          'Based on ${p?.basedOn ?? 0} cycle(s)',
+          valueColor: p?.confidence == 'high'
+              ? Colors.green
+              : p?.confidence == 'medium'
+              ? Colors.orange
+              : Colors.black54,
         ),
       ],
     );
@@ -571,123 +581,14 @@ class _CycleTrackingScreenState extends State<CycleTrackingScreen> {
     );
   }
 
-  // ── SYMPTOMS SECTION ──
-  Widget _buildSymptomsSection(CycleProvider provider) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: _allSymptoms.map((symptom) {
-              final isSelected = _selectedSymptoms.contains(symptom);
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    if (isSelected) {
-                      _selectedSymptoms.remove(symptom);
-                    } else {
-                      _selectedSymptoms.add(symptom);
-                    }
-                  });
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? const Color(0xFFB565A7)
-                        : const Color(0xFFF5F5F5),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isSelected
-                          ? const Color(0xFFB565A7)
-                          : Colors.black12,
-                    ),
-                  ),
-                  child: Text(
-                    symptom,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: isSelected ? Colors.white : Colors.black54,
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              onPressed: provider.isSaving
-                  ? null
-                  : () async {
-                      final success = await provider
-                          .logSymptoms(_selectedSymptoms);
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              success
-                                  ? 'Symptoms saved!'
-                                  : provider.error ?? 'Failed to save',
-                            ),
-                            backgroundColor: success
-                                ? const Color(0xFFB565A7)
-                                : Colors.red,
-                          ),
-                        );
-                      }
-                    },
-              style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFFB565A7),
-                side: const BorderSide(color: Color(0xFFB565A7)),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: provider.isSaving
-                  ? const SizedBox(
-                      height: 16,
-                      width: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Color(0xFFB565A7),
-                      ),
-                    )
-                  : const Text('Save Symptoms'),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ── SYMPTOM INSIGHTS BUTTON ──
-  Widget _buildSymptomInsightsButton(BuildContext context) {
+  Widget _buildInsightsButton(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
-        onPressed: () {
-          Navigator.pushNamed(context, '/symptom-insights');
-        },
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const CycleInsightsScreen()),
+        ),
         style: OutlinedButton.styleFrom(
           foregroundColor: const Color(0xFFB565A7),
           side: const BorderSide(color: Color(0xFFB565A7)),
@@ -698,26 +599,36 @@ class _CycleTrackingScreenState extends State<CycleTrackingScreen> {
         ),
         icon: const Icon(Icons.insights_outlined, size: 18),
         label: const Text(
-          'View Symptom Insights',
+          'View Insights',
           style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
         ),
       ),
     );
   }
 
-  // ── CYCLE HISTORY ──
-  Widget _buildCycleHistory(BuildContext context, CycleProvider provider) {
+  Widget _buildCycleHistory(CycleProvider provider) {
     if (provider.cycles.isEmpty) {
       return Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
         ),
         child: const Center(
-          child: Text(
-            'No cycles logged yet',
-            style: TextStyle(color: Colors.black38, fontSize: 14),
+          child: Column(
+            children: [
+              Icon(Icons.water_drop_outlined, size: 40, color: Colors.black12),
+              SizedBox(height: 10),
+              Text(
+                'No cycles logged yet',
+                style: TextStyle(color: Colors.black38, fontSize: 14),
+              ),
+              SizedBox(height: 4),
+              Text(
+                'Tap Log Today to get started',
+                style: TextStyle(color: Colors.black26, fontSize: 12),
+              ),
+            ],
           ),
         ),
       );
@@ -727,10 +638,7 @@ class _CycleTrackingScreenState extends State<CycleTrackingScreen> {
       children: provider.cycles.map((cycle) {
         return Container(
           margin: const EdgeInsets.only(bottom: 10),
-          padding: const EdgeInsets.symmetric(
-            horizontal: 14,
-            vertical: 12,
-          ),
+          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(14),
@@ -745,8 +653,8 @@ class _CycleTrackingScreenState extends State<CycleTrackingScreen> {
           child: Row(
             children: [
               Container(
-                width: 36,
-                height: 36,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
                   color: const Color(0xFFFBEAF0),
                   borderRadius: BorderRadius.circular(10),
@@ -754,7 +662,7 @@ class _CycleTrackingScreenState extends State<CycleTrackingScreen> {
                 child: const Icon(
                   Icons.water_drop_outlined,
                   color: Color(0xFF993556),
-                  size: 18,
+                  size: 20,
                 ),
               ),
               const SizedBox(width: 12),
@@ -763,47 +671,41 @@ class _CycleTrackingScreenState extends State<CycleTrackingScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      cycle.endDate != null
-                          ? '${cycle.startDate.day}/${cycle.startDate.month} → ${cycle.endDate!.day}/${cycle.endDate!.month}'
-                          : '${cycle.startDate.day}/${cycle.startDate.month}/${cycle.startDate.year}',
+                      '${cycle.startDate.day}/${cycle.startDate.month} - ${cycle.endDate.day}/${cycle.endDate.month}',
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: Colors.black87,
                       ),
                     ),
-                    if (cycle.symptoms.isNotEmpty)
-                      Text(
-                        cycle.symptoms.join(', '),
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: Colors.black45,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                    Text(
+                      '${cycle.startDate.year}',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Colors.black38,
                       ),
+                    ),
                   ],
                 ),
               ),
-              if (cycle.periodLength != null)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFBEAF0),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    '${cycle.periodLength} days',
-                    style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF993556),
-                    ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFBEAF0),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '${cycle.periodLength} days',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF993556),
                   ),
                 ),
+              ),
             ],
           ),
         );
@@ -821,4 +723,7 @@ class _CycleTrackingScreenState extends State<CycleTrackingScreen> {
       ),
     );
   }
+
+  String _capitalize(String s) =>
+      s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
 }

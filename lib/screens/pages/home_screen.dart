@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth/auth_provider.dart';
 import '../../screens/pcos_check/pcos_check_screen.dart';
+import '../cycle/daily_log_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -87,10 +88,18 @@ class HomeScreen extends StatelessWidget {
                       icon: Icons.person_outline,
                       label: 'Profile & Settings',
                       onTap: () {
-                        // TODO: navigate to profile
+                        Navigator.pushNamed(context, '/profile');
                       },
                     ),
 
+                    const SizedBox(height: 10),
+                    _buildQuickAccessItem(
+                      icon: Icons.person_outline,
+                      label: 'Past Prediction',
+                      onTap: () {
+                        Navigator.pushNamed(context, '/prediction-history');
+                      },
+                    ),
                     const SizedBox(height: 32),
                   ],
                 ),
@@ -232,7 +241,14 @@ class HomeScreen extends StatelessWidget {
       {
         'icon': Icons.monitor_heart_outlined,
         'label': 'Daily Symptoms',
-        'onTap': () => Navigator.pushNamed(context, '/cycle-tracking'),
+        'onTap': () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => DailyLogScreen(
+              date: DateTime.now().toIso8601String().split('T')[0],
+            ),
+          ),
+        ),
       },
       {
         'icon': Icons.tips_and_updates_outlined,

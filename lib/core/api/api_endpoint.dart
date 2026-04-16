@@ -62,12 +62,12 @@ class ApiEndpoints {
   static String adminAppointmentById(String id) => '/admin/appointments/$id';
 
   // Cycle
-  static const String cycles = '/user/cycles';
-  static const String cyclesPrediction = '/user/cycles/prediction';
-  static const String cyclesSymptoms = '/user/cycles/symptoms';
-  static const String cyclesTodaySymptoms = '/user/cycles/symptoms/today';
-  static const String cyclesInsights = '/user/cycles/symptoms/insights';
-  static String cycleById(String id) => '/user/cycles/$id';
+  static const String cycleLog = '/user/cycles/log';
+  static const String cycleLogRange = '/user/cycles/log/range';
+  static String cycleLogByDate(String date) => '/user/cycles/log/$date';
+  static const String cycleHistory = '/user/cycles/history';
+  static const String cyclePrediction = '/user/cycles/prediction';
+  static const String cycleInsights = '/user/cycles/insights';
 
   // prediction
   static const String predict = '/prediction/predict';

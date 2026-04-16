@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/meal/meal_model.dart';
 import '../../providers/meal/meal_provider.dart';
+import './swap_meal_screen.dart';
 
 class MealPlanScreen extends StatefulWidget {
   const MealPlanScreen({super.key});
@@ -550,11 +551,22 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
                 ),
                 const SizedBox(height: 8),
 
-                // swap button
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
-                    onPressed: () => _showSwapSheet(context, day, provider),
+                    onPressed: () async {
+                      if (meal == null) return;
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => MealSwapScreen(
+                            dayNumber: _selectedDay,
+                            mealType: _selectedMealType,
+                            currentMeal: meal,
+                          ),
+                        ),
+                      );
+                    },
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFFB565A7),
                       side: const BorderSide(color: Color(0xFFB565A7)),

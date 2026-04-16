@@ -313,7 +313,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                 ),
                 SizedBox(height: 2),
                 Text(
-                  'Coming soon — share your latest assessment with the doctor',
+                  'Share your latest assessment with the doctor',
                   style: TextStyle(fontSize: 12, color: Colors.black38),
                 ),
               ],
@@ -325,7 +325,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
               if (value) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Assessment sharing coming soon'),
+                    content: Text('You will share your assessment here'),
                     backgroundColor: Color(0xFFB565A7),
                   ),
                 );

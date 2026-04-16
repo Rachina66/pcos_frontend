@@ -1,21 +1,58 @@
+class DailyLogModel {
+  final String id;
+  final String userId;
+  final DateTime date;
+  final bool isPeriod;
+  final String? flow;
+  final String? mood;
+  final int? energy;
+  final List<String> symptoms;
+  final String? notes;
+  final DateTime createdAt;
+
+  DailyLogModel({
+    required this.id,
+    required this.userId,
+    required this.date,
+    required this.isPeriod,
+    this.flow,
+    this.mood,
+    this.energy,
+    required this.symptoms,
+    this.notes,
+    required this.createdAt,
+  });
+
+  factory DailyLogModel.fromJson(Map<String, dynamic> json) {
+    return DailyLogModel(
+      id: json['id'],
+      userId: json['userId'],
+      date: DateTime.parse(json['date']),
+      isPeriod: json['isPeriod'] ?? false,
+      flow: json['flow'],
+      mood: json['mood'],
+      energy: json['energy'],
+      symptoms: List<String>.from(json['symptoms'] ?? []),
+      notes: json['notes'],
+      createdAt: DateTime.parse(json['createdAt']),
+    );
+  }
+}
+
 class CycleLogModel {
   final String id;
   final String userId;
   final DateTime startDate;
-  final DateTime? endDate;
-  final int? periodLength;
-  final List<String> symptoms;
-  final String? notes;
+  final DateTime endDate;
+  final int periodLength;
   final DateTime createdAt;
 
   CycleLogModel({
     required this.id,
     required this.userId,
     required this.startDate,
-    this.endDate,
-    this.periodLength,
-    required this.symptoms,
-    this.notes,
+    required this.endDate,
+    required this.periodLength,
     required this.createdAt,
   });
 
@@ -24,10 +61,8 @@ class CycleLogModel {
       id: json['id'],
       userId: json['userId'],
       startDate: DateTime.parse(json['startDate']),
-      endDate: json['endDate'] != null ? DateTime.parse(json['endDate']) : null,
+      endDate: DateTime.parse(json['endDate']),
       periodLength: json['periodLength'],
-      symptoms: List<String>.from(json['symptoms'] ?? []),
-      notes: json['notes'],
       createdAt: DateTime.parse(json['createdAt']),
     );
   }
@@ -35,12 +70,16 @@ class CycleLogModel {
 
 class CyclePredictionModel {
   final bool predicted;
-  final DateTime? nextPeriodDate;
+  final DateTime? nextPeriodStart;
+  final DateTime? nextPeriodEnd;
   final int? avgCycleLength;
-  final int? avgDuration;
+  final int? avgPeriodLength;
   final String? regularity;
   final int? variation;
+  final String? confidence;
   final int? daysUntil;
+  final String? status;
+  final int? basedOn;
   final int? currentCycleDay;
   final DateTime? lastPeriodDate;
   final String? message;
@@ -48,12 +87,16 @@ class CyclePredictionModel {
 
   CyclePredictionModel({
     required this.predicted,
-    this.nextPeriodDate,
+    this.nextPeriodStart,
+    this.nextPeriodEnd,
     this.avgCycleLength,
-    this.avgDuration,
+    this.avgPeriodLength,
     this.regularity,
     this.variation,
+    this.confidence,
     this.daysUntil,
+    this.status,
+    this.basedOn,
     this.currentCycleDay,
     this.lastPeriodDate,
     this.message,
@@ -63,14 +106,20 @@ class CyclePredictionModel {
   factory CyclePredictionModel.fromJson(Map<String, dynamic> json) {
     return CyclePredictionModel(
       predicted: json['predicted'] ?? false,
-      nextPeriodDate: json['nextPeriodDate'] != null
-          ? DateTime.parse(json['nextPeriodDate'])
+      nextPeriodStart: json['nextPeriodStart'] != null
+          ? DateTime.parse(json['nextPeriodStart'])
+          : null,
+      nextPeriodEnd: json['nextPeriodEnd'] != null
+          ? DateTime.parse(json['nextPeriodEnd'])
           : null,
       avgCycleLength: json['avgCycleLength'],
-      avgDuration: json['avgDuration'],
+      avgPeriodLength: json['avgPeriodLength'],
       regularity: json['regularity'],
       variation: json['variation'],
+      confidence: json['confidence'],
       daysUntil: json['daysUntil'],
+      status: json['status'],
+      basedOn: json['basedOn'],
       currentCycleDay: json['currentCycleDay'],
       lastPeriodDate: json['lastPeriodDate'] != null
           ? DateTime.parse(json['lastPeriodDate'])
@@ -81,66 +130,83 @@ class CyclePredictionModel {
   }
 }
 
-class SymptomInsightModel {
+class CycleInsightsModel {
   final bool hasInsights;
   final String? message;
   final int? cyclesAnalyzed;
-  final List<SymptomTrend> improving;
-  final List<SymptomTrend> worsening;
-  final List<SymptomTrend> consistent;
-  final List<String> mostCommon;
+  final List<TopSymptom> topSymptoms;
+  final MoodInsight? mood;
+  final EnergyInsight? energy;
 
-  SymptomInsightModel({
+  CycleInsightsModel({
     required this.hasInsights,
     this.message,
     this.cyclesAnalyzed,
-    required this.improving,
-    required this.worsening,
-    required this.consistent,
-    required this.mostCommon,
+    required this.topSymptoms,
+    this.mood,
+    this.energy,
   });
 
-  factory SymptomInsightModel.fromJson(Map<String, dynamic> json) {
-    return SymptomInsightModel(
+  factory CycleInsightsModel.fromJson(Map<String, dynamic> json) {
+    return CycleInsightsModel(
       hasInsights: json['hasInsights'] ?? false,
       message: json['message'],
       cyclesAnalyzed: json['cyclesAnalyzed'],
-      improving: (json['improving'] as List? ?? [])
-          .map((e) => SymptomTrend.fromJson(e))
+      topSymptoms: (json['topSymptoms'] as List? ?? [])
+          .map((e) => TopSymptom.fromJson(e))
           .toList(),
-      worsening: (json['worsening'] as List? ?? [])
-          .map((e) => SymptomTrend.fromJson(e))
-          .toList(),
-      consistent: (json['consistent'] as List? ?? [])
-          .map((e) => SymptomTrend.fromJson(e))
-          .toList(),
-      mostCommon: List<String>.from(json['mostCommon'] ?? []),
+      mood: json['mood'] != null ? MoodInsight.fromJson(json['mood']) : null,
+      energy: json['energy'] != null
+          ? EnergyInsight.fromJson(json['energy'])
+          : null,
     );
   }
 }
 
-class SymptomTrend {
+class TopSymptom {
   final String symptom;
-  final String trend;
+  final int count;
   final int frequency;
-  final int totalOccurrences;
-  final int cyclesTracked;
 
-  SymptomTrend({
+  TopSymptom({
     required this.symptom,
-    required this.trend,
+    required this.count,
     required this.frequency,
-    required this.totalOccurrences,
-    required this.cyclesTracked,
   });
 
-  factory SymptomTrend.fromJson(Map<String, dynamic> json) {
-    return SymptomTrend(
+  factory TopSymptom.fromJson(Map<String, dynamic> json) {
+    return TopSymptom(
       symptom: json['symptom'],
-      trend: json['trend'],
+      count: json['count'],
       frequency: json['frequency'],
-      totalOccurrences: json['totalOccurrences'],
-      cyclesTracked: json['cyclesTracked'],
+    );
+  }
+}
+
+class MoodInsight {
+  final int? duringPeriod;
+  final int? outsidePeriod;
+
+  MoodInsight({this.duringPeriod, this.outsidePeriod});
+
+  factory MoodInsight.fromJson(Map<String, dynamic> json) {
+    return MoodInsight(
+      duringPeriod: json['duringPeriod'],
+      outsidePeriod: json['outsidePeriod'],
+    );
+  }
+}
+
+class EnergyInsight {
+  final int? duringPeriod;
+  final int? outsidePeriod;
+
+  EnergyInsight({this.duringPeriod, this.outsidePeriod});
+
+  factory EnergyInsight.fromJson(Map<String, dynamic> json) {
+    return EnergyInsight(
+      duringPeriod: json['duringPeriod'],
+      outsidePeriod: json['outsidePeriod'],
     );
   }
 }
