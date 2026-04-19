@@ -93,7 +93,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   children: [
                     const SizedBox(height: 8),
 
-                    // ── Change password card ──
+                    //Change password card
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -393,9 +393,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   }
 }
 
-// ═══════════════════════════════════════════════════════════
-// FORGOT PASSWORD SCREEN
-// ═══════════════════════════════════════════════════════════
+
+//FORGOT PASSWORD SCREEN
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});

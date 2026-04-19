@@ -13,6 +13,7 @@ class AppointmentService {
     required String timeSlot,
     String? reason,
     String? reportFilePath,
+    String? predictionId,
   }) async {
     try {
       if (reportFilePath != null) {
@@ -21,6 +22,7 @@ class AppointmentService {
           'date': date,
           'timeSlot': timeSlot,
           if (reason != null) 'reason': reason,
+          if (predictionId != null) 'predictionId': predictionId,
           'reportFile': await MultipartFile.fromFile(reportFilePath),
         });
 
@@ -39,6 +41,7 @@ class AppointmentService {
           'date': date,
           'timeSlot': timeSlot,
           if (reason != null) 'reason': reason,
+          if (predictionId != null) 'predictionId': predictionId,
         },
       );
       return AppointmentModel.fromJson(response.data['data']);

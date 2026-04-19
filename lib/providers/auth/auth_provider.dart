@@ -1,5 +1,3 @@
-// ─── 2. lib/providers/auth/auth_provider.dart ────────────────────────────────
-
 import 'package:flutter/material.dart';
 import '../../models/auth/auth_data_model.dart';
 import '../../models/user/user_model.dart';
@@ -10,7 +8,7 @@ class AuthProvider extends ChangeNotifier {
   UserModel? _user;
   String? _token;
   bool _isLoading = false;
-  String? _pendingEmail; // email waiting for OTP verification
+  String? _pendingEmail; //email waiting for OTP verification
 
   UserModel? get user => _user;
   String? get token => _token;
@@ -19,7 +17,7 @@ class AuthProvider extends ChangeNotifier {
   bool get isAuthenticated => _token != null;
   bool get isAdmin => _user?.role == 'ADMIN';
 
-  // ── LOGIN ──
+  //Login
   Future<String?> login({
     required String email,
     required String password,
@@ -40,7 +38,7 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // ── REGISTER — just sends OTP, no login yet ──
+  //For register send OTP
   Future<String?> register({
     required String name,
     required String email,
@@ -54,9 +52,9 @@ class AuthProvider extends ChangeNotifier {
         password: password,
       );
       if (!response.success) return response.message;
-      _pendingEmail = email; // store for OTP screen
+      _pendingEmail = email; //store for OTP screen
       notifyListeners();
-      return null; // success → navigate to OTP screen
+      return null; //success,navigate to OTP screen
     } catch (e) {
       return 'Registration failed. Please try again.';
     } finally {
@@ -64,7 +62,7 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // ── VERIFY OTP — completes login ──
+  //Verify OTP which completes login
   Future<String?> verifyEmail({required String otp}) async {
     if (_pendingEmail == null) return 'No email found. Please register again.';
     _setLoading(true);
@@ -84,7 +82,7 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // ── LOGOUT ──
+  //Logout
   Future<void> logout() async {
     _user = null;
     _token = null;
@@ -110,5 +108,15 @@ class AuthProvider extends ChangeNotifier {
   void _setLoading(bool value) {
     _isLoading = value;
     notifyListeners();
+  }
+
+  Future<void> refreshUser() async {
+    try {
+      final response = await AuthService.getProfile();
+      if (response.success && response.data != null) {
+        _user = response.data;
+        notifyListeners();
+      }
+    } catch (_) {}
   }
 }

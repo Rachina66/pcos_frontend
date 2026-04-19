@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 import '../../core/constants/api_constants.dart';
 import '../../models/api/api_response_model.dart';
 import '../../models/auth/auth_data_model.dart';
+import '../../core/storage/secure_storage.dart';
+import '../../models/user/user_model.dart';
 
 class AuthService {
   // LOGIN
@@ -56,6 +58,23 @@ class AuthService {
     return ApiResponseModel<AuthDataModel>.fromJson(
       jsonBody,
       (data) => AuthDataModel.fromJson(data),
+    );
+  }
+
+  // GET PROFILE — fetches current user from backend
+  static Future<ApiResponseModel<UserModel>> getProfile() async {
+    final token = await SecureStorage.getToken();
+    final response = await http.get(
+      Uri.parse(ApiConstants.baseUrl + ApiConstants.profile),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    final jsonBody = jsonDecode(response.body);
+    return ApiResponseModel<UserModel>.fromJson(
+      jsonBody,
+      (data) => UserModel.fromJson(data),
     );
   }
 }

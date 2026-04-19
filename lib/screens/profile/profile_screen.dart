@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../providers/auth/auth_provider.dart';
 import 'change_password_screen.dart';
 import 'faq_screen.dart';
+import '../../providers/profile/profile_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -14,7 +15,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  // ── Edit name inline ──
+  //Edit name inline
   bool _editingName = false;
   final _nameController = TextEditingController();
 
@@ -95,7 +96,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   const SizedBox(height: 8),
 
-                  // ── Account section ──
+                  //Account section 
                   _buildSectionTitle('Account'),
                   const SizedBox(height: 10),
                   _buildSection([
@@ -126,7 +127,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ]),
                   const SizedBox(height: 20),
 
-                  // ── App section ──
+                  //App section
                   _buildSectionTitle('App'),
                   const SizedBox(height: 10),
                   _buildSection([
@@ -149,7 +150,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ]),
                   const SizedBox(height: 28),
 
-                  // ── Logout ──
+                  //Logout
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
@@ -402,7 +403,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
-// ── Edit Name Screen ──
+//Edit Name Screen
 class EditNameScreen extends StatefulWidget {
   final String currentName;
   const EditNameScreen({super.key, required this.currentName});
@@ -437,9 +438,23 @@ class _EditNameScreenState extends State<EditNameScreen> {
       return;
     }
 
-    // Just pop back — actual update handled by ProfileProvider
-    // which would need to be wired here
-    // For now show success and pop
+    final error = await context.read<ProfileProvider>().updateName(
+      _controller.text.trim(),
+    );
+
+    if (!mounted) return;
+
+    if (error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
+    //Refresh auth user so header updates immediately
+    await context.read<AuthProvider>().refreshUser();
+
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Name updated successfully!'),

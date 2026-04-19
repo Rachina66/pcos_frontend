@@ -10,6 +10,7 @@ import 'widgets/time_slots_grid.dart';
 import 'widgets/reason_input.dart';
 import 'widgets/file_picker_button.dart';
 import 'widgets/confirm_button.dart';
+import '../../providers/prediction/prediction_provider.dart';
 
 class BookAppointmentScreen extends StatefulWidget {
   const BookAppointmentScreen({super.key});
@@ -26,6 +27,15 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
   String? _selectedFilePath;
   String? _selectedFileName;
   bool _shareAssessment = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch past predictions in case latestResult is not in session
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<PredictionProvider>().fetchMyPredictions();
+    });
+  }
 
   @override
   void dispose() {
@@ -136,6 +146,17 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
     final dateString =
         '${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}';
 
+    // Resolve predictionId only if user toggled share assessment ON
+    String? predictionId;
+    if (_shareAssessment) {
+      final predProvider = context.read<PredictionProvider>();
+      if (predProvider.latestResult != null) {
+        predictionId = predProvider.latestResult!.predictionId;
+      } else if (predProvider.predictions.isNotEmpty) {
+        predictionId = predProvider.predictions.first.id;
+      }
+    }
+
     final success = await context.read<AppointmentProvider>().bookAppointment(
       doctorId: doctor.id,
       date: dateString,
@@ -144,6 +165,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
           ? null
           : _reasonController.text.trim(),
       reportFilePath: _selectedFilePath,
+      predictionId: predictionId,
     );
 
     if (!mounted) return;
@@ -278,63 +300,124 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
   }
 
   Widget _buildAssessmentToggle() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+    final predProvider = context.watch<PredictionProvider>();
+    final latestResult = predProvider.latestResult;
+    final latestFromList = predProvider.predictions.isNotEmpty
+        ? predProvider.predictions.first
+        : null;
+    final hasPrediction = latestResult != null || latestFromList != null;
+    final riskLevel = latestResult?.riskLevel ?? latestFromList?.riskLevel;
+    final confidence = latestResult?.confidence ?? latestFromList?.confidence;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.assignment_outlined,
-            color: Color(0xFFB565A7),
-            size: 22,
-          ),
-          const SizedBox(width: 12),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Share PCOS Assessment',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.assignment_outlined,
+                color: Color(0xFFB565A7),
+                size: 22,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Share PCOS Assessment',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      hasPrediction
+                          ? 'Your latest assessment will be shared with the doctor'
+                          : 'No assessment found. Complete a PCOS check first.',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.black38,
+                      ),
+                    ),
+                  ],
                 ),
-                SizedBox(height: 2),
-                Text(
-                  'Share your latest assessment with the doctor',
-                  style: TextStyle(fontSize: 12, color: Colors.black38),
+              ),
+              Switch(
+                value: _shareAssessment,
+                // disabled if no prediction exists
+                onChanged: hasPrediction
+                    ? (value) => setState(() => _shareAssessment = value)
+                    : null,
+                activeColor: const Color(0xFFB565A7),
+              ),
+            ],
+          ),
+        ),
+
+        // Preview card shown only when toggled ON
+        if (_shareAssessment && hasPrediction) ...[
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: const Color(0xFFB565A7).withOpacity(0.08),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: const Color(0xFFB565A7).withOpacity(0.3),
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.check_circle,
+                  color: Color(0xFFB565A7),
+                  size: 20,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Risk Level: ${riskLevel ?? 'N/A'}',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFFB565A7),
+                        ),
+                      ),
+                      if (confidence != null)
+                        Text(
+                          'Confidence: ${confidence.toStringAsFixed(1)}%',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.black54,
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
-          Switch(
-            value: _shareAssessment,
-            onChanged: (value) {
-              if (value) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('You will share your assessment here'),
-                    backgroundColor: Color(0xFFB565A7),
-                  ),
-                );
-              }
-            },
-            activeColor: const Color(0xFFB565A7),
-          ),
         ],
-      ),
+      ],
     );
   }
 

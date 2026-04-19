@@ -1,5 +1,3 @@
-// lib/screens/meal/meal_plan_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/meal/meal_model.dart';

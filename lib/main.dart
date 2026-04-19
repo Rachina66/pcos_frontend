@@ -8,7 +8,7 @@ import 'providers/doctor/doctor_provider.dart';
 import 'providers/cycle/cycle_provider.dart';
 import 'providers/prediction/prediction_provider.dart';
 import 'providers/meal/meal_provider.dart';
-import 'providers/profile/profile_provider.dart';          // ← ADD
+import 'providers/profile/profile_provider.dart'; 
 import 'routes/index.dart';
 import 'screens/pages/home_screen.dart';
 import 'screens/doctors/doctors_list_screen.dart';
@@ -21,7 +21,9 @@ import 'screens/pcos_check/pcos_check_screen.dart';
 import 'screens/pcos_check/prediction_history_screen.dart';
 import 'screens/auth/otp_verification_screen.dart';
 import 'screens/meal/meal_plan_sreen.dart';
-import 'screens/profile/profile_screen.dart';              // ← ADD
+import 'screens/profile/profile_screen.dart'; 
+import 'providers/content/content_provider.dart';
+import 'screens/content/content_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,7 +38,8 @@ void main() {
         ChangeNotifierProvider(create: (_) => CycleProvider()),
         ChangeNotifierProvider(create: (_) => PredictionProvider()),
         ChangeNotifierProvider(create: (_) => MealProvider()),
-        ChangeNotifierProvider(create: (_) => ProfileProvider()),  
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProvider(create: (_) => ContentProvider()),
       ],
       child: const MyApp(),
     ),
@@ -69,7 +72,8 @@ class MyApp extends StatelessWidget {
         '/prediction-history': (context) => const PredictionHistoryScreen(),
         '/otp-verify': (context) => const OtpVerificationScreen(),
         '/meal-plan': (context) => const MealPlanScreen(),
-        '/profile': (context) => const ProfileScreen(), 
+        '/profile': (context) => const ProfileScreen(),
+        '/content': (context) => const ContentScreen(),
       },
     );
   }

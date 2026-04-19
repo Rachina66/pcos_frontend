@@ -252,8 +252,7 @@ class HomeScreen extends StatelessWidget {
       },
       {
         'icon': Icons.tips_and_updates_outlined,
-        'label': 'Health Tips',
-        'onTap': () {}, // TODO
+        'label': 'Health Tips','onTap': () => Navigator.pushNamed(context, '/content'),
       },
     ];
 
