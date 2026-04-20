@@ -1,8 +1,8 @@
 class ApiEndpoints {
   static const String ip =
-      'https://self-plaza-calibrate.ngrok-free.dev'; //'192.168.1.70'; //
+      'https://self-plaza-calibrate.ngrok-free.dev'; // '192.168.1.70'; //'https://self-plaza-calibrate.ngrok-free.dev';
   static const String baseUrl =
-      'https://self-plaza-calibrate.ngrok-free.dev/api'; // 'http://192.168.1.70:4000/api';
+      'https://self-plaza-calibrate.ngrok-free.dev/api'; //  'http://192.168.1.70:4000/api'; //'https://self-plaza-calibrate.ngrok-free.dev/api';
 
   // auth
   static const String login = '/auth/login';
@@ -73,4 +73,10 @@ class ApiEndpoints {
   // prediction
   static const String predict = '/prediction/predict';
   static const String predictions = '/prediction/predictions';
+
+  // Notifications
+  static const String notifications = '/notifications';
+  static const String notificationsUnreadCount = '/notifications/unread-count';
+  static String markNotificationRead(String id) => '/notifications/$id/read';
+  static const String markAllNotificationsRead = '/notifications/read-all';
 }

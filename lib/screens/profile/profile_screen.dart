@@ -96,7 +96,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   const SizedBox(height: 8),
 
-                  //Account section 
+                  //Account section
                   _buildSectionTitle('Account'),
                   const SizedBox(height: 10),
                   _buildSection([

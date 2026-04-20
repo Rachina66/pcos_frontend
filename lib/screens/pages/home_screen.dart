@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth/auth_provider.dart';
+import '../../providers/notification/notification_provider.dart';
 import '../../screens/pcos_check/pcos_check_screen.dart';
 import '../cycle/daily_log_screen.dart';
 
@@ -16,28 +17,17 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ═══ HEADER ═══
               _buildHeader(context),
-
               const SizedBox(height: 24),
-
-              // ═══ BODY ═══
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Start PCOS Check Button
                     _buildStartPCOSButton(context),
-
                     const SizedBox(height: 12),
-
-                    // Connect Doctor Button
                     _buildConnectDoctorButton(context),
-
                     const SizedBox(height: 28),
-
-                    // Track & Manage Section
                     const Text(
                       'Track & Manage',
                       style: TextStyle(
@@ -46,14 +36,9 @@ class HomeScreen extends StatelessWidget {
                         color: Colors.black87,
                       ),
                     ),
-
                     const SizedBox(height: 12),
-
                     _buildTrackManageGrid(context),
-
                     const SizedBox(height: 28),
-
-                    // Quick Access Section
                     const Text(
                       'Quick Access',
                       style: TextStyle(
@@ -62,43 +47,32 @@ class HomeScreen extends StatelessWidget {
                         color: Colors.black87,
                       ),
                     ),
-
                     const SizedBox(height: 12),
                     _buildQuickAccessItem(
                       icon: Icons.calendar_month_outlined,
                       label: 'My Appointments',
-                      onTap: () {
-                        Navigator.pushNamed(context, '/my-appointments');
-                      },
+                      onTap: () =>
+                          Navigator.pushNamed(context, '/my-appointments'),
                     ),
-
                     const SizedBox(height: 12),
-
                     _buildQuickAccessItem(
                       icon: Icons.history,
                       label: 'History & Reports',
-                      onTap: () {
-                        Navigator.pushNamed(context, '/history-reports');
-                      },
+                      onTap: () =>
+                          Navigator.pushNamed(context, '/history-reports'),
                     ),
-
                     const SizedBox(height: 10),
-
                     _buildQuickAccessItem(
                       icon: Icons.person_outline,
                       label: 'Profile & Settings',
-                      onTap: () {
-                        Navigator.pushNamed(context, '/profile');
-                      },
+                      onTap: () => Navigator.pushNamed(context, '/profile'),
                     ),
-
                     const SizedBox(height: 10),
                     _buildQuickAccessItem(
                       icon: Icons.person_outline,
                       label: 'Past Prediction',
-                      onTap: () {
-                        Navigator.pushNamed(context, '/prediction-history');
-                      },
+                      onTap: () =>
+                          Navigator.pushNamed(context, '/prediction-history'),
                     ),
                     const SizedBox(height: 32),
                   ],
@@ -111,10 +85,11 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // ═══ HEADER ═══
+  // ═══ HEADER — updated with bell badge ═══
   Widget _buildHeader(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
     final userName = authProvider.user?.name ?? 'User';
+    final unreadCount = context.watch<NotificationProvider>().unreadCount;
 
     return Container(
       width: double.infinity,
@@ -133,7 +108,7 @@ class HomeScreen extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Welcome text
+          // ── Welcome text ──
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -155,7 +130,57 @@ class HomeScreen extends StatelessWidget {
 
           const Spacer(),
 
-          // Avatar
+          // ── Bell icon with badge ──
+          GestureDetector(
+            onTap: () => Navigator.pushNamed(context, '/notifications'),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.3),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.notifications_outlined,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+                if (unreadCount > 0)
+                  Positioned(
+                    top: -4,
+                    right: -4,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFE53935),
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 18,
+                        minHeight: 18,
+                      ),
+                      child: Text(
+                        unreadCount > 99 ? '99+' : '$unreadCount',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+
+          const SizedBox(width: 10),
+
+          // ── Avatar ──
           Container(
             width: 44,
             height: 44,
@@ -174,14 +199,12 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // ═══ START PCOS CHECK BUTTON ═══
+  // ═══ START PCOS CHECK BUTTON — unchanged ═══
   Widget _buildStartPCOSButton(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
-        onPressed: () {
-          Navigator.pushNamed(context, '/pcos-check');
-        },
+        onPressed: () => Navigator.pushNamed(context, '/pcos-check'),
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFFB565A7),
           foregroundColor: Colors.white,
@@ -200,14 +223,12 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // ═══ CONNECT DOCTOR BUTTON ═══
+  // ═══ CONNECT DOCTOR BUTTON — unchanged ═══
   Widget _buildConnectDoctorButton(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
-        onPressed: () {
-          Navigator.pushNamed(context, '/doctors');
-        },
+        onPressed: () => Navigator.pushNamed(context, '/doctors'),
         style: OutlinedButton.styleFrom(
           foregroundColor: const Color(0xFFB565A7),
           padding: const EdgeInsets.symmetric(vertical: 16),
@@ -225,7 +246,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // ═══ TRACK & MANAGE GRID ═══
+  // ═══ TRACK & MANAGE GRID — unchanged ═══
   Widget _buildTrackManageGrid(BuildContext context) {
     final items = [
       {
@@ -252,7 +273,8 @@ class HomeScreen extends StatelessWidget {
       },
       {
         'icon': Icons.tips_and_updates_outlined,
-        'label': 'Health Tips','onTap': () => Navigator.pushNamed(context, '/content'),
+        'label': 'Health Tips',
+        'onTap': () => Navigator.pushNamed(context, '/content'),
       },
     ];
 
@@ -273,7 +295,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // ═══ GRID ITEM ═══
+  // ═══ GRID ITEM — unchanged ═══
   Widget _buildGridItem({
     required IconData icon,
     required String label,
@@ -321,7 +343,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // ═══ QUICK ACCESS ITEM ═══
+  // ═══ QUICK ACCESS ITEM — unchanged ═══
   Widget _buildQuickAccessItem({
     required IconData icon,
     required String label,

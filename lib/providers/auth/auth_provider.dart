@@ -3,12 +3,14 @@ import '../../models/auth/auth_data_model.dart';
 import '../../models/user/user_model.dart';
 import '../../services/auth/auth_service.dart';
 import '../../core/storage/secure_storage.dart';
+import '../notification/notification_provider.dart';
 
 class AuthProvider extends ChangeNotifier {
   UserModel? _user;
   String? _token;
   bool _isLoading = false;
-  String? _pendingEmail; //email waiting for OTP verification
+  String? _pendingEmail;
+  NotificationProvider? _notificationProvider;
 
   UserModel? get user => _user;
   String? get token => _token;
@@ -16,6 +18,11 @@ class AuthProvider extends ChangeNotifier {
   String? get pendingEmail => _pendingEmail;
   bool get isAuthenticated => _token != null;
   bool get isAdmin => _user?.role == 'ADMIN';
+
+  // ── Called once from main.dart to inject notification provider ──
+  void setNotificationProvider(NotificationProvider provider) {
+    _notificationProvider = provider;
+  }
 
   //Login
   Future<String?> login({
@@ -52,9 +59,9 @@ class AuthProvider extends ChangeNotifier {
         password: password,
       );
       if (!response.success) return response.message;
-      _pendingEmail = email; //store for OTP screen
+      _pendingEmail = email;
       notifyListeners();
-      return null; //success,navigate to OTP screen
+      return null;
     } catch (e) {
       return 'Registration failed. Please try again.';
     } finally {
@@ -74,7 +81,7 @@ class AuthProvider extends ChangeNotifier {
       if (!response.success) return response.message;
       _pendingEmail = null;
       _setAuthData(response.data!);
-      return null; // success → navigate to home
+      return null;
     } catch (e) {
       return 'Verification failed. Please try again.';
     } finally {
@@ -84,6 +91,7 @@ class AuthProvider extends ChangeNotifier {
 
   //Logout
   Future<void> logout() async {
+    _notificationProvider?.disconnect();
     _user = null;
     _token = null;
     await SecureStorage.deleteToken();
@@ -102,6 +110,13 @@ class AuthProvider extends ChangeNotifier {
     _user = authData.user;
     _token = authData.token;
     await SecureStorage.saveToken(_token!);
+
+    // ── Connect socket + fetch notifications after login/verify ──
+    if (_user?.id != null && _token != null) {
+      _notificationProvider?.connect(_user!.id, _token!);
+      _notificationProvider?.fetchNotifications();
+    }
+
     notifyListeners();
   }
 

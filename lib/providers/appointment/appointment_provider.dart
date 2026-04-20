@@ -6,21 +6,18 @@ import '../../services/appointment/appointment_service.dart';
 class AppointmentProvider extends ChangeNotifier {
   final AppointmentService _service = AppointmentService();
 
-  
   List<AppointmentModel> _appointments = [];
   bool _isLoading = false;
   bool _isBooking = false;
   String? _error;
   String? _successMessage;
 
-  
   List<AppointmentModel> get appointments => _appointments;
   bool get isLoading => _isLoading;
   bool get isBooking => _isBooking;
   String? get error => _error;
   String? get successMessage => _successMessage;
 
-  
   List<AppointmentModel> get upcomingAppointments => _appointments
       .where(
         (a) =>
@@ -39,7 +36,6 @@ class AppointmentProvider extends ChangeNotifier {
   List<AppointmentModel> get pendingAppointments =>
       _appointments.where((a) => a.status == 'PENDING').toList();
 
-  
   Future<void> fetchMyAppointments() async {
     _isLoading = true;
     _error = null;
@@ -57,7 +53,6 @@ class AppointmentProvider extends ChangeNotifier {
     }
   }
 
-  
   Future<bool> bookAppointment({
     required String doctorId,
     required String date,
@@ -138,7 +133,6 @@ class AppointmentProvider extends ChangeNotifier {
     }
   }
 
-  
   void clearMessages() {
     _error = null;
     _successMessage = null;
