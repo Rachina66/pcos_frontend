@@ -2,7 +2,7 @@ class ApiEndpoints {
   static const String ip =
       'https://self-plaza-calibrate.ngrok-free.dev'; // '192.168.1.70'; //'https://self-plaza-calibrate.ngrok-free.dev';
   static const String baseUrl =
-      'https://self-plaza-calibrate.ngrok-free.dev/api'; //  'http://192.168.1.70:4000/api'; //'https://self-plaza-calibrate.ngrok-free.dev/api';
+      'https://self-plaza-calibrate.ngrok-free.dev/api'; //'192.168.1.70'; //'https://self-plaza-calibrate.ngrok-free.dev/api';
 
   // auth
   static const String login = '/auth/login';

@@ -38,7 +38,7 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen>
         children: [
           _buildHeader(context),
 
-          // ═══ TABS ═══
+          //TABS
           Container(
             color: Colors.white,
             child: TabBar(
@@ -59,7 +59,7 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen>
             ),
           ),
 
-          // ═══ TAB CONTENT ═══
+          //TAB CONTENT
           Expanded(
             child: Consumer<AppointmentProvider>(
               builder: (context, appointmentProvider, child) {

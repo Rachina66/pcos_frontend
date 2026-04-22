@@ -1,5 +1,3 @@
-// lib/screens/profile/profile_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth/auth_provider.dart';
@@ -15,7 +13,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  //Edit name inline
+  
   bool _editingName = false;
   final _nameController = TextEditingController();
 

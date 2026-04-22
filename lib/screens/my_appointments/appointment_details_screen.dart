@@ -20,17 +20,17 @@ class AppointmentDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ── Doctor Info ──
+                  
                   _buildDoctorCard(appointment),
                   const SizedBox(height: 16),
 
-                  // ── Appointment Info ──
+                
                   _buildSectionTitle('Appointment Info'),
                   const SizedBox(height: 10),
                   _buildAppointmentInfo(appointment),
                   const SizedBox(height: 16),
 
-                  // ── Consultation Details ──
+                  
                   _buildSectionTitle('Consultation Details'),
                   const SizedBox(height: 10),
                   _buildConsultationDetails(appointment),
